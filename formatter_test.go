@@ -89,3 +89,50 @@ func TestLTSVFormatter_Format(t *testing.T) {
 		}
 	}
 }
+
+func TestJSONFormatter_Format(t *testing.T) {
+	now := time.Now()
+	for _, v := range []struct {
+		entry    *loggan.Entry
+		expected string
+	}{
+		{&loggan.Entry{
+			Level:   loggan.DEBUG,
+			Time:    now,
+			Message: "test_json_log1",
+			Fields: loggan.Fields{
+				"first":  1,
+				"second": "2",
+				"third":  "san",
+			},
+		}, `{"level":"DEBUG","time":"` + now.Format(time.RFC3339Nano) + `","message":"test_json_log1","first":1,"second":"2","third":"san"}`},
+		{&loggan.Entry{
+			Level:   loggan.INFO,
+			Time:    now,
+			Message: "test_json_log2",
+		}, `{"level":"INFO","time":"` + now.Format(time.RFC3339Nano) + `","message":"test_json_log2"}`},
+		{&loggan.Entry{
+			Level: loggan.WARN,
+			Time:  now,
+		}, `{"level":"WARN","time":"` + now.Format(time.RFC3339Nano) + `"}`},
+		{&loggan.Entry{
+			Level: loggan.ERROR,
+			Time:  now,
+		}, `{"level":"ERROR","time":"` + now.Format(time.RFC3339Nano) + `"}`},
+		{&loggan.Entry{
+			Level: loggan.FATAL,
+		}, `{"level":"FATAL"}`},
+		{&loggan.Entry{}, `{"level":"NONE"}`},
+	} {
+		var buf bytes.Buffer
+		formatter := &loggan.JSONFormatter{}
+		if err := formatter.Format(&buf, v.entry); err != nil {
+			t.Errorf(`JSONFormatter.Format(&buf, %#v) => %#v; want %#v`, v.entry, err, nil)
+		}
+		actual := buf.String()
+		expected := v.expected
+		if !reflect.DeepEqual(actual, expected) {
+			t.Errorf(`JSONFormatter.Format(&buf, %#v); buf => %#v; want %#v`, v.entry, actual, expected)
+		}
+	}
+}

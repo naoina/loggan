@@ -79,10 +79,18 @@ Loggan includes some formatter.
 
 - `loggan.LTSVFormatter`
 
-    Format by [Labeled Tab-separated Values](http://ltsv.org/).
+    Format to [Labeled Tab-separated Values](http://ltsv.org/).
 
     ```text
     level:INFO	time:2016-06-14T10:09:57.529623894+09:00	message:This is an info log
+    ```
+
+- `loggan.JSONFormatter`
+
+    Format to JSON
+
+    ```json
+    {"level":"INFO","time":"2016-06-14T21:05:53.497413624+09:00","message":"This is an info log"}
     ```
 
 - `loggan.RawFormatter`
