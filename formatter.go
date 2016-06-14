@@ -1,7 +1,6 @@
 package loggan
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"time"
@@ -32,17 +31,23 @@ type LTSVFormatter struct {
 
 // Format formats an entry to Labeled Tab-separated Values format.
 func (f *LTSVFormatter) Format(w io.Writer, entry *Entry) error {
-	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "level:%v", entry.Level)
+	if _, err := fmt.Fprintf(w, "level:%v", entry.Level); err != nil {
+		return err
+	}
 	if !entry.Time.IsZero() {
-		fmt.Fprintf(&buf, "\ttime:%v", entry.Time.Format(time.RFC3339Nano))
+		if _, err := fmt.Fprintf(w, "\ttime:%v", entry.Time.Format(time.RFC3339Nano)); err != nil {
+			return err
+		}
 	}
 	if entry.Message != "" {
-		fmt.Fprintf(&buf, "\tmessage:%v", entry.Message)
+		if _, err := fmt.Fprintf(w, "\tmessage:%v", entry.Message); err != nil {
+			return err
+		}
 	}
 	for _, k := range entry.Fields.OrderedKeys() {
-		fmt.Fprintf(&buf, "\t%v:%v", k, entry.Fields.Get(k))
+		if _, err := fmt.Fprintf(w, "\t%v:%v", k, entry.Fields.Get(k)); err != nil {
+			return err
+		}
 	}
-	_, err := io.Copy(w, &buf)
-	return err
+	return nil
 }
